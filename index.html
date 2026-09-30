@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced CSIT Academic Portal</title>
+    <!-- Authentication Guard -->
+    <script>
+        try {
+            if (!localStorage.getItem("csit_portal_auth_user")) {
+                window.location.replace("login.html");
+            }
+        } catch(e) {}
+    </script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js for Analytics -->
@@ -28,12 +36,24 @@
             </div>
         </div>
         <div class="header-actions">
+            <!-- Logged-in User Profile Badge -->
+            <div class="user-pill" id="userProfilePill">
+                <i class="fa-solid fa-circle-user"></i>
+                <div class="user-pill-text">
+                    <span class="user-pill-name" id="userNameDisplay">Admin User</span>
+                    <span class="user-pill-role" id="userRoleDisplay">Administrator</span>
+                </div>
+            </div>
+
             <button class="btn-theme" onclick="toggleTheme()" id="themeToggleBtn"><i class="fa-solid fa-moon"></i> Dark Mode</button>
             <button class="btn-excel" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
             <button class="btn-csv" onclick="exportToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
             <button class="btn-trash" onclick="openTrashModal()">
                 <i class="fa-solid fa-trash-can"></i> Trash 
                 <span class="badge" id="trashCountBadge">0</span>
+            </button>
+            <button class="btn-logout" onclick="handleLogout()" title="Logout of Portal">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
             </button>
         </div>
     </header>

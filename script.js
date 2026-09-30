@@ -1,6 +1,8 @@
 // LocalStorage Keys
 const STORAGE_KEY = "csit_portal_students_v3";
 const TRASH_KEY = "csit_portal_trash_v3";
+const AUTH_KEY = "csit_portal_auth_user";
+const THEME_KEY = "csit_portal_theme";
 
 // Global Application State
 let studentsData = [];
@@ -21,24 +23,82 @@ let gradeChartInstance = null;
 
 // Initial Setup
 document.addEventListener("DOMContentLoaded", () => {
+    const user = checkAuth();
+    if (!user) return;
+
+    applySavedTheme();
+    updateUserInfo(user);
     loadInitialData();
     initCharts();
     updateUI();
 });
 
+// Authentication Guard
+function checkAuth() {
+    const authData = localStorage.getItem(AUTH_KEY);
+    if (!authData) {
+        window.location.replace("login.html");
+        return null;
+    }
+    try {
+        return JSON.parse(authData);
+    } catch (e) {
+        localStorage.removeItem(AUTH_KEY);
+        window.location.replace("login.html");
+        return null;
+    }
+}
+
+function updateUserInfo(user) {
+    if (!user) return;
+    const nameEl = document.getElementById("userNameDisplay");
+    const roleEl = document.getElementById("userRoleDisplay");
+    if (nameEl) nameEl.innerText = user.name || "Admin User";
+    if (roleEl) roleEl.innerText = user.role || "Administrator";
+}
+
+function handleLogout() {
+    if (confirm("Are you sure you want to log out from the CSIT Academic Portal?")) {
+        localStorage.removeItem(AUTH_KEY);
+        showToast("Logged out successfully! Redirecting...");
+        setTimeout(() => {
+            window.location.replace("login.html");
+        }, 600);
+    }
+}
+
 // Toast Notification
 function showToast(message) {
     const toast = document.getElementById("toast");
+    if (!toast) return;
     toast.innerText = message;
     toast.style.display = "block";
     setTimeout(() => { toast.style.display = "none"; }, 3000);
 }
 
-// Dark/Light Theme Switch
+// Dark/Light Theme Switch & Persistence
+function applySavedTheme() {
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+    } else {
+        document.body.classList.remove("dark-mode");
+    }
+    updateThemeToggleBtn();
+}
+
 function toggleTheme() {
     document.body.classList.toggle("dark-mode");
     const isDark = document.body.classList.contains("dark-mode");
-    document.getElementById("themeToggleBtn").innerHTML = isDark ? 
+    localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+    updateThemeToggleBtn();
+}
+
+function updateThemeToggleBtn() {
+    const btn = document.getElementById("themeToggleBtn");
+    if (!btn) return;
+    const isDark = document.body.classList.contains("dark-mode");
+    btn.innerHTML = isDark ? 
         '<i class="fa-solid fa-sun"></i> Light Mode' : 
         '<i class="fa-solid fa-moon"></i> Dark Mode';
 }
