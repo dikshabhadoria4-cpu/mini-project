@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced CSIT Academic Portal</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Top Header -->
+    <header>
+        <div class="header-title">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <div>
+                <h1>CSIT Department Academic Portal</h1>
+                <p>Student Record Management System </p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-theme" onclick="toggleTheme()" id="themeToggleBtn"><i class="fa-solid fa-moon"></i> Dark Mode</button>
+            <button class="btn-excel" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+            <button class="btn-csv" onclick="exportToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+            <button class="btn-trash" onclick="openTrashModal()">
+                <i class="fa-solid fa-trash-can"></i> Trash 
+                <span class="badge" id="trashCountBadge">0</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- Live Analytics Summary Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Total Active Students</h3>
+                    <div class="value" id="statTotalEnrolled">0</div>
+                    <div class="sub-text"><i class="fa-solid fa-circle-check"></i> Live Database</div>
+                </div>
+                <div class="stat-icon blue"><i class="fa-solid fa-user-group"></i></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Class Topper</h3>
+                    <div class="value" id="statTopperName">--</div>
+                    <div class="sub-text orange" id="statTopperCgpa">CGPA: --</div>
+                </div>
+                <div class="stat-icon yellow"><i class="fa-solid fa-trophy"></i></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Pass Rate</h3>
+                    <div class="value" id="statPassRate">0%</div>
+                    <div class="sub-text green"><i class="fa-solid fa-arrow-up-right-dots"></i> CGPA ≥ 5.0</div>
+                </div>
+                <div class="stat-icon green"><i class="fa-solid fa-chart-line"></i></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Trash Count</h3>
+                    <div class="value" id="statTrashCount">0</div>
+                    <div class="sub-text red"><i class="fa-solid fa-box-archive"></i> Deleted Items</div>
+                </div>
+                <div class="stat-icon red"><i class="fa-solid fa-trash"></i></div>
+            </div>
+        </div>
+
+        <!-- Interactive Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="fa-solid fa-chart-pie"></i> Course Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="courseChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fa-solid fa-chart-bar"></i> Grade Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="gradeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Search & Multi-Level Filtering -->
+        <div class="controls-card">
+            <div class="search-row">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search name, roll no, city, email..." onkeyup="handleFilterChange()">
+                </div>
+                <button class="btn-add" onclick="openStudentModal()"><i class="fa-solid fa-user-plus"></i> Add Student</button>
+            </div>
+
+            <div class="filters-row">
+                <select class="select-filter" id="filterCourse" onchange="handleFilterChange()">
+                    <option value="">All Courses</option>
+                    <option value="B.Sc. CS">B.Sc. CS</option>
+                    <option value="B.Tech IT">B.Tech IT</option>
+                </select>
+
+                <!-- Semesters 1 to 6 Only -->
+                <select class="select-filter" id="filterSem" onchange="handleFilterChange()">
+                    <option value="">All Semesters</option>
+                    <option value="Sem 1">Sem 1</option>
+                    <option value="Sem 2">Sem 2</option>
+                    <option value="Sem 3">Sem 3</option>
+                    <option value="Sem 4">Sem 4</option>
+                    <option value="Sem 5">Sem 5</option>
+                    <option value="Sem 6">Sem 6</option>
+                </select>
+
+                <select class="select-filter" id="filterCity" onchange="handleFilterChange()">
+                    <option value="">All Cities</option>
+                    <option value="Thane">Thane</option>
+                    <option value="Kalwa">Kalwa</option>
+                    <option value="Mumbra">Mumbra</option>
+                    <option value="Diva">Diva</option>
+                    <option value="Dombivli">Dombivli</option>
+                    <option value="Thakurli">Thakurli</option>
+                    <option value="Kalyan">Kalyan</option>
+                    <option value="Vithalwadi">Vithalwadi</option>
+                    <option value="Ulhasnagar">Ulhasnagar</option>
+                    <option value="Ambernath">Ambernath</option>
+                    <option value="Badlapur">Badlapur</option>
+                </select>
+
+                <select class="select-filter" id="filterGrade" onchange="handleFilterChange()">
+                    <option value="">All Grades</option>
+                    <option value="O">O Grade</option>
+                    <option value="A+">A+ Grade</option>
+                    <option value="A">A Grade</option>
+                    <option value="B+">B+ Grade</option>
+                </select>
+
+                <button class="btn-reset" onclick="resetFilters()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            </div>
+        </div>
+
+        <!-- Student Data Table -->
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('id')" class="sortable">ID <i class="fa-solid fa-sort" id="sort-id"></i></th>
+                        <th onclick="sortTable('name')" class="sortable">Student Details <i class="fa-solid fa-sort" id="sort-name"></i></th>
+                        <th>Course & Sem</th>
+                        <th>Parents Info</th>
+                        <th>Contact & Email</th>
+                        <th onclick="sortTable('city')" class="sortable">City <i class="fa-solid fa-sort" id="sort-city"></i></th>
+                        <th onclick="sortTable('cgpa')" class="sortable">CGPA <i class="fa-solid fa-sort" id="sort-cgpa"></i></th>
+                        <th>Grade</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    <!-- Populated dynamically via script.js -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-card">
+            <div class="per-page-selector">
+                <label>Rows per page:</label>
+                <select id="pageSizeSelect" onchange="changePageSize()">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <div class="page-info" id="paginationInfo">Showing 0 to 0 of 0 records</div>
+            <div class="pagination-buttons">
+                <button id="btnPrevPage" onclick="prevPage()"><i class="fa-solid fa-angle-left"></i> Prev</button>
+                <span id="currentPageNum" class="page-num">1</span>
+                <button id="btnNextPage" onclick="nextPage()">Next <i class="fa-solid fa-angle-right"></i></button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add / Edit Student Modal -->
+    <div class="modal-overlay" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"><i class="fa-solid fa-user-plus"></i> Add New Student</h2>
+                <span class="modal-close" onclick="closeStudentModal()">&times;</span>
+            </div>
+            <form id="studentForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editStudentId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Student Full Name *</label>
+                        <input type="text" id="inpName" required placeholder="e.g. Rahul Sharma">
+                    </div>
+                    <div class="form-group">
+                        <label>Gender *</label>
+                        <select id="inpGender" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Blood Group *</label>
+                        <select id="inpBloodGroup" required>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Course *</label>
+                        <select id="inpCourseName" required>
+                            <option value="B.Sc. CS">B.Sc. CS</option>
+                            <option value="B.Tech IT">B.Tech IT</option>
+                        </select>
+                    </div>
+                    <!-- Semester 1 to 6 Only -->
+                    <div class="form-group">
+                        <label>Semester *</label>
+                        <select id="inpSemester" required>
+                            <option value="Sem 1">Sem 1</option>
+                            <option value="Sem 2">Sem 2</option>
+                            <option value="Sem 3">Sem 3</option>
+                            <option value="Sem 4">Sem 4</option>
+                            <option value="Sem 5">Sem 5</option>
+                            <option value="Sem 6">Sem 6</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Father Name *</label>
+                        <input type="text" id="inpFather" required placeholder="Father Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Mother Name *</label>
+                        <input type="text" id="inpMother" required placeholder="Mother Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Parent Contact (10 Digits) *</label>
+                        <input type="tel" id="inpParentContact" pattern="[0-9]{10}" required placeholder="e.g. 9876543210">
+                    </div>
+                    <div class="form-group">
+                        <label>Student Contact (10 Digits) *</label>
+                        <input type="tel" id="inpStudentContact" pattern="[0-9]{10}" required placeholder="e.g. 9123456789">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Student Email ID *</label>
+                        <input type="email" id="inpEmail" required placeholder="student@csitportal.edu.in">
+                    </div>
+                    <div class="form-group">
+                        <label>City *</label>
+                        <select id="inpCity" required>
+                            <option value="Thane">Thane</option>
+                            <option value="Kalwa">Kalwa</option>
+                            <option value="Mumbra">Mumbra</option>
+                            <option value="Diva">Diva</option>
+                            <option value="Dombivli">Dombivli</option>
+                            <option value="Thakurli">Thakurli</option>
+                            <option value="Kalyan">Kalyan</option>
+                            <option value="Vithalwadi">Vithalwadi</option>
+                            <option value="Ulhasnagar">Ulhasnagar</option>
+                            <option value="Ambernath">Ambernath</option>
+                            <option value="Badlapur">Badlapur</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>CGPA (0 - 10) *</label>
+                        <input type="number" id="inpCGPA" step="0.01" min="0" max="10" required placeholder="e.g. 8.75">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeStudentModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Save Student Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Trash Modal -->
+    <div class="modal-overlay" id="trashModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-trash-can"></i> Deleted Student Records (Trash)</h2>
+                <span class="modal-close" onclick="closeTrashModal()">&times;</span>
+            </div>
+            <div class="table-card" style="max-height: 400px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>City</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trashTableBody">
+                        <!-- Trash items -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer" style="margin-top: 15px;">
+                <button class="btn-cancel" onclick="closeTrashModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
